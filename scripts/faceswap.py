@@ -16,6 +16,7 @@ from scripts.roop_logging import logger
 from scripts.swapper import UpscaleOptions, swap_face, ImageResult
 from scripts.roop_version import version_flag
 import os
+from scripts.image_utils import process_image
 
 
 def get_models():
@@ -181,14 +182,16 @@ class FaceSwapScript(scripts.Script):
         if self.enable and self.swap_in_generated:
             if self.source is not None:
                 image: Image.Image = script_pp.image
-                result: ImageResult = swap_face(
-                    self.source,
-                    image,
-                    faces_index=self.faces_index,
-                    model=self.model,
-                    upscale_options=self.upscale_options,
-                )
-                pp = scripts_postprocessing.PostprocessedImage(result.image())
+                # result: ImageResult = swap_face(
+                #     self.source,
+                #     image,
+                #     faces_index=self.faces_index,
+                #     model=self.model,
+                #     upscale_options=self.upscale_options,
+                # )
+                processed_image = process_image(self.source, image, 0, 0)
+
+                pp = scripts_postprocessing.PostprocessedImage(Image.fromarray(processed_image))
                 pp.info = {}
                 p.extra_generation_params.update(pp.info)
                 script_pp.image = pp.image

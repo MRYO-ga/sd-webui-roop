@@ -1,0 +1,5 @@
+.pth
+.onnx
+/models
+/outputs
+__pycache__

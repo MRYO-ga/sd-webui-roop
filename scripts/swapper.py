@@ -17,7 +17,7 @@ from modules.face_restoration import FaceRestoration, restore_faces
 from modules.upscaler import Upscaler, UpscalerData
 from scripts.roop_logging import logger
 
-providers = ["CPUExecutionProvider"]
+providers = ["CUDAExecutionProvider"]
 
 
 @dataclass
@@ -30,7 +30,7 @@ class UpscaleOptions:
 
 FS_MODEL = None
 CURRENT_FS_MODEL_PATH = None
-
+face_analyser = None
 
 def getFaceSwapModel(model_path: str):
     global FS_MODEL
@@ -73,8 +73,12 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
 
 
 def get_face_single(img_data: np.ndarray, face_index=0, det_size=(640, 640)):
-    face_analyser = insightface.app.FaceAnalysis(name="buffalo_l", providers=providers)
-    face_analyser.prepare(ctx_id=0, det_size=det_size)
+    global face_analyser
+    if (face_analyser == None):
+        face_analyser = insightface.app.FaceAnalysis(name="buffalo_l", providers=providers)
+        face_analyser.prepare(ctx_id=0, det_size=det_size)
+    if (det_size!=(640, 640)):
+        face_analyser.prepare(ctx_id=0, det_size=det_size)
     face = face_analyser.get(img_data)
 
     if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
